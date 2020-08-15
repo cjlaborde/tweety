@@ -17,4 +17,8 @@
 16. Remove app.css and use main.css since we don't want to use bootstrap
 17. <link href="{{ asset('css/main.css') }}" rel="stylesheet">
 18. now check site tweety.test and notice we lost the layout
-19. 
+
+### Design the Timeline
+1. Get rid of all html in home.blade.php
+2. Go to layout and remove code inside <div id="app">
+3. Create public/images to save logo
