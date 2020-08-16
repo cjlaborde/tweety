@@ -55,7 +55,6 @@
 19. Now you only need to update getAvatarAttribute when you add actual avatar
 
 
-
 > Dude has like 6 years of experience, but knowledge level is that of a junior dev
 @Kramer#8335 
 I had worse situation, I had prospet owner of a marketing agency who have no idea about Marketing and  I have to them teach how to run their damn business. Made terrible decisions and blew the budged on outsourcing marketing to multiple people, to do the marketing for them, when the site was not even built and they only wanted to use 20% of the budget in developing costs. When 

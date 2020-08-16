@@ -47,4 +47,15 @@ class User extends Authenticatable
         // return Tweet::latest()->get();
         return Tweet::where('user_id', $this->id)->latest()->get();
     }
+
+    public function follow(User $user)
+    {
+        return $this->follows()->save($user);
+    }
+
+    public function follows()
+    {
+        // click on belongsToMany to see the options we use to be more specific
+        return $this->belongsToMany(User::class, 'follows', 'user_id', 'following_user_id');
+    }
 }
