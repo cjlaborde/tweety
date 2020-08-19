@@ -54,8 +54,31 @@
 18. create a partial in User.php model called getAvatarAttribute the call it with auth()->user()->avatar in the view.
 19. Now you only need to update getAvatarAttribute when you add actual avatar
 
-
-> Dude has like 6 years of experience, but knowledge level is that of a junior dev
-@Kramer#8335 
-I had worse situation, I had prospet owner of a marketing agency who have no idea about Marketing and  I have to them teach how to run their damn business. Made terrible decisions and blew the budged on outsourcing marketing to multiple people, to do the marketing for them, when the site was not even built and they only wanted to use 20% of the budget in developing costs. When 
-For a custom site they "sold" to their client. They wanted it done in 1 month fully operational when it was a complex 4-6 month project that would require more than 1 developer to produce.
+### Expanding the Timeline
+1. Delete HomeController and move index into TweetsController.php
+2. In Login Controller to change where you go after log in.
+3. Open LoginController.php and notice by default laravel redirect
+4. protected $redirectTo = RouteServiceProvider::HOME;
+5. click RouteServiceProvider::HOME
+6. Go to /app/Providers/RouteServiceProvider.php
+7. Change     public const HOME = '/home';
+8. to public const HOME = '/tweets';
+9. Visit without been logged in into http://tweety.test/tweets and get error
+10. Call to a member function timeline() on null
+11. so apply a Route::middlewate('auth')->group(function ()
+12. Now if  I try to access /tweets without logged in, will be redirected to http://tweety.test/tweets
+13. The Timeline with tweets created by the user.
+14. In in User add another relationship tweet
+15. Now in tinker App\User::First()->tweets we can get all tweets from user
+16. Remove timeline() function in User.php
+17. To include user's tweets
+18. as well as the tweets of everyone that user follow
+19. Order tweet in decending order by date
+20.  Lets fetch all tweets from user user ideas of the user follows
+21.  $user->follows->pluck('id') you can get all ideas user follows
+22.  Now we can finish timeline() relationship in User.php model
+23.  Create tweets with factory('App\Tweet')->create(['user_id => 5]); for user with id 5
+24.  $ids = $this->follows->pluck('id'); problem is that if user follows 5000 people would show tweets from 5,000 users
+25.  So we chain it like this  $ids = $this->follows()->pluck('id'); so we only get id and not a full collection of users.
+26.  Which we then pluck the id.
+27.  Now we do other fixes to timeline() in User.php model.

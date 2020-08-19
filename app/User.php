@@ -45,7 +45,27 @@ class User extends Authenticatable
     public function timeline()
     {
         // return Tweet::latest()->get();
-        return Tweet::where('user_id', $this->id)->latest()->get();
+        // return Tweet::where('user_id', $this->id)->latest()->get();
+
+        // include all of the user's tweets
+        // as well as the tweets of everyone
+        // they folllow ... in decending order by date.
+        // $ids = $this->follows->pluck('id');
+
+        // user id to show his tweets as well.
+        // $ids->push($this->id);
+
+        // Give me all tweets of user ids that are inside this array.
+        $friends = $this->follows->pluck('id');
+
+        return Tweet::whereIn('user_id', $friends)
+            ->orWhere('user_id', $this->id)
+            ->latest()->get();
+    }
+
+    public function tweets()
+    {
+        return $this->hasMany(Tweet::class);
     }
 
     public function follow(User $user)
@@ -53,6 +73,7 @@ class User extends Authenticatable
         return $this->follows()->save($user);
     }
 
+    // checks who you follow
     public function follows()
     {
         // click on belongsToMany to see the options we use to be more specific
