@@ -1,42 +1,32 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
     <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <!-- CSRF Token -->
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>{{ config('app.name', 'Laravel') }}</title>
-
-    <!-- Scripts -->
-    <script src="{{ asset('js/app.js') }}" defer></script>
-
-    <!-- Fonts -->
-    <link rel="dns-prefetch" href="//fonts.gstatic.com">
-    <link href="https://fonts.googleapis.com/css?family=Nunito" rel="stylesheet">
+    <title>{{ config('app.name', 'Tweety') }}</title>
 
     <!-- Styles -->
-    <link href="{{ asset('css/main.css') }}" rel="stylesheet">
+    <link href="{{ mix('css/app.css') }}" rel="stylesheet">
 </head>
-<body>
-    <div id="app">
-        <section class="px-8 py-4 mb-6">
-            <header class="container mx-auto">
-                <h1>
-                    <img
-                        src="/images/logo.svg"
-                        alt="Tweety"
-                    >
+<body class="bg-gray-100 h-screen antialiased leading-none">
+<div class="flex flex-col">
+    <div class="min-h-screen flex items-center justify-center">
+        <div class="flex flex-col justify-around h-full">
+            <div>
+                <h1 class="text-gray-600 text-center font-light tracking-wider text-5xl mb-6">
+                    {{ config('app.name', 'Laravel') }}
                 </h1>
-            </header>
-        </section>
-
-        <section class="px-8">
-            <main class="container mx-auto">
-                @yield('content')
-            </main>
-        </section>
+                <ul class="list-reset">
+                    @yield('content')
+                </ul>
+            </div>
+        </div>
     </div>
+</div>
 </body>
 </html>

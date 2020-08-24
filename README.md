@@ -82,3 +82,44 @@
 25.  So we chain it like this  $ids = $this->follows()->pluck('id'); so we only get id and not a full collection of users.
 26.  Which we then pluck the id.
 27.  Now we do other fixes to timeline() in User.php model.
+
+### Construct the Profile Page
+1. In TweetsController index lets be more consistent    return view('tweets.index',
+2. Then create tweets folder for the view
+3. Since profile and tweets page have same layout
+4. intead of writing same twice then add it to the layouts/app.blade.php
+5. create route for profile
+6. create route Route::get('/profiles/{user}', 'ProfileController@show');
+7. then create controller ProfileControler
+8. Now visit profile link but you need to change name to username later we add column or else would be strage to visit url with name
+9. http://tweety.test/profiles/john Now you can see name on page.
+10. But if you add function show(User $user) will not work since laravel will think name is the id.
+11. So if we use 1 it will fail.
+12. To fix this go to User.php model and overwrite getRouteKeyName() to return the name instead of id.
+13. then return 'name'
+14. to show you how it works.
+15. in web.php at top put DB:listen(function ($query) { var_dump($query->sql, $query->bidings); };)
+16. With this, it will send database queies in a var_dump
+17. DB::listen(function ($query) { var_dump($query->sql, $query->bindings); });
+18. then you comment ProfileController return and getRouteKeyName in User.php method
+19. Then you will see how getRouteKeyName works behind the scenes it works.
+20. 'select * from `users` where `id` = ? limit 1' array (size=1) 0 => string 'john' (length=4)
+21. Now uncomment getRouteKeyName() in User.php
+22. See the output changes, now it looks for name  'select * from `users` where `name` = ? limit 1'
+23. Now in ProfilesController return the view with user
+24. npx tailwindcss init --full to modify default tailwind
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
