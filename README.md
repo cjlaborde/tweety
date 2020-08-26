@@ -109,6 +109,42 @@
 23. Now in ProfilesController return the view with user
 24. npx tailwindcss init --full to modify default tailwind
 
+### Nested Layout Files with Components
+1. Now we have problem since layout file assumes you are signed in.
+2. That is why you can't access http://tweety.test/register views/auth/register.blade.php
+3. create a file for layout views/components/master.blade.php
+4. Then add a {{ $slot }} inside
+5. Now we create views/components/app.blade.php
+6. Then use <x-master> master been the template name, now everything inside x-master will be slotted with {{ $slot }}
+7. Then slot in the default content for layout component {{ $slot }}
+8. In register.blade.php replace
+```php
+@extends('layouts.app')
+
+@section('content')
+```
+9. With <x-master></x-master> check http://tweety.test/register to see that it does work
+10. Now do the same with views/auth/login.blade.php
+11. Now go to views/tweets/index.php and replace
+```php
+@extends('layouts.theme')
+
+@section('content')
+```
+12. with <x-app></x-app>
+13. Then as good practice have single root element so put them into a div
+```php
+<x-app>
+    <div>
+        @include ('_publish-tweet-panel')
+        
+        @include ('_timeline')
+    </div>
+</x-app>
+```
+14. Now you have multiple layout files that require the same partials
+15. Change tweets/index.php as well.
+
 
 
 

@@ -1,5 +1,3 @@
-
-
 <div class="rounded-lg py-4">
     <h3 class="font-bold text-xl mb-4">Following</h3>
     <ul>
