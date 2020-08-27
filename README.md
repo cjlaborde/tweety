@@ -215,20 +215,129 @@
 45. Notice that latest tweet in bottom fix this by adding order in User.php tweets() method
 46. `return $this->hasMany(Tweet::class)->latest();`
 
+### Profile Authorization Logic
+1. Makes no sense following button appear in profile.
+2. So wrap it with an if in follow-button.blade.php
+3. @if (auth()->user()->isNot($user))
+4. or you can use @unless
+5. We can edit profiles but can't edit profiles of my friends.
+6. Go to profiles/show.blade.php
+7. @if (auth()->user()->is($user))
+8. Now I can't edit other users profile that I am following
+
+#### Create helpers.php
+1. create file App/helpers.php and create functon called current_user()
+2. Then inside add return auth()->user();
+3. Now it will not work since we have not add it to our composer.json
+4. now add it to autoload
+```php
+    "autoload": {
+        "psr-4": {
+            "App\\": "app/"
+        },
+        "classmap": [
+            "database/seeds",
+            "database/factories"
+        ],
+        "files": [
+            "app/helpers.php"
+        ]
+    },
+```
+5. Now to add it use command `composer dump-autoload`
+6. Now you can refresh page and it will work.
+7. Now we have new place to store any helper functions like that
+8. Now you can also use it on follow-button.blade.php
 
 
 
 
+#### Create edit profile
+1. In profiles/show.blade.php
+2. <a href="{{ $user->path('edit') }}"  we can pass argument that will be appended to the path.
+3. Modify path() method to check if we are appending
+```php
+    public function path($append = '')
+    {
+        $path = route('profile', $this->name);
 
+        // check if we are appending anything otherwise just return the path
+        return $append ? "{$path}/{$append}" : $path;
+    }
+ ```
+ 4. Now notice http://tweety.test/profiles/john/edit the link in the Edit Profile button
+ 5. Go to route file and add some authorization
+ 6. Route::get('/profiles/{user:name}/edit', 'ProfilesController@edit');
+ 7. Then create edit() method in ProflesController
+ 8. add new views/profiles/edit.blade.php
+ 9. Problem is that http://tweety.test/profiles/Lavada%20Von/edit you can access any edit
+ 10. So we need to add authorization
+```php
+    public function edit(User $user)
+    {
+        if($user->isNot(current_user())) {
+            abort(404);
+        }
+        
+        return view('profiles.edit', compact('user'));
+    }
+```
+11. We can create abort_if helper function or create a policy
 
+#### Policy
+1. `php artisan make:policy UserPolicy` create method
+2. We have the user in question and auth user
+3. You can edit user if you are that user
+```php
+    public function edit(User $currentUser, User $user)
+    {
+        return $currentUser->is($user);
+        
+    }
+```
+4. Then we can handle it a couple of ways. Go to profilesController
+```php
+    public function edit(User $user)
+    {
+        $this->authorize('edit', $user);
 
+        return view('profiles.edit', compact('user'));
+    }
 
+```
 
+5. You can do it on controller or
+6. You can also manage auth in route file declaration web.php
+```php
+    Route::get('/profiles/{user:name}/edit', 'ProfilesController@edit')->middleware('can:edit,user');
+```
+7. Now in profilesController we can remove 
+```php
+    public function edit(User $user)
+    {
+        $this->authorize('edit', $user);
 
-
-
-
-
+        return view('profiles.edit', compact('user'));
+    }
+```
+8. Now you can go to profiles/show.blade.php
+9. Remove this since is not needed.
+10. What if in future you want to allow admin edit all profiles.
+11. You would have to go to all if and change them
+12. That is why is good to have a single point UserPolicy.php where that is declared.
+```php
+    @if (current_user()->is($user))
+```
+13. change it with @can instead
+```php
+    @can ('edit', $user)
+    <a href="{{ $user->path('edit') }}" 
+           class="rounded-full border border-gray-300 py-2 px-4 text-black text-xs mr-2"
+        >
+            Edit Profile
+    </a>
+    @endcan
+```
 
 
 
