@@ -338,6 +338,101 @@
     </a>
     @endcan
 ```
+### File Storage and Custom Avatars
+1. Create nullable column for avatar in users migration
+2. Add username to migration
+3. php artisan migrate:fresh
+4. Now register does not ask for username so you need to add it register.blade.php
+5. add the username input
+6. Now to make it work go to RegisterController
+7. You havve to validate it
+8. You have to create it 
+9. Update fillable fields
+10. Validate'username' => ['required', 'string', 'max:255', 'unique:users', 'alpha_dash'],
+11. alpha_dash means you can provide numbers or letters or dash but no spaces.
+12. Add to fillable in protected $fillable = ['username', 'name', 'email', 'password']; to User.php model
+13. Now we will use username as identifier in User.php path
+```php
+    public function path($append = '')
+    {
+        // $path = route('profile', $this->name);
+        $path = route('profile', $this->username);
+
+        // check if we are appending anything otherwise just return the path
+        return $append ? "{$path}/{$append}" : $path;
+    }
+```
+14. Now update to username from name in web.php
+15. Create user and visit profile page
+
+#### Handle Empty Collections
+1. Go to _timeline.blade.php
+2. Assume there no friends or no tweets
+3. So to hide list just use forelse instead of foreach in _timeline.blade.php
+4. Now do the same in friends-list.blade.php
+
+#### Build the edit profile form
+1. We going to have form in the profiles/edit.blade.php
+2. Here we have label
+3. Input that are required
+4. Validation to show error messages
+5. If we tell laravel password should be confirmed
+6. Then it should look for name="password_confirmation"
+7. Create end point route `Route::patch('/profiles/{user:username}', 'ProfilesController@update');`
+8. in ProfilesController.php in the update method you want rule for username
+9. `Rule::unique('users')->ignore($user),` ignore will ignore username is the same since is your username and not of another user.
+10. $user->update($attributes);
+11. return redirect($user->path());
+
+#### File Storage and Custom Avatars
+1. Set intup type="file"
+2. When ever you accept file you need to set your form to enctype="multipart/form-data"
+3. dd(request('avatar')); to see the content of submited avatar
+4. Notice Illuminate\Http\UploadedFile and check the store method inside it.
+5. request('avatar')->store('avatars'); This store() will save the image and return a path where image is stored
+6. What we save in database is the path where image is stored not the image itself.
+7. Now submit form and check image is on storage/app/avatars
+8. But we want image in the public go to config/filesystem.php
+9. in .env to change path write FILESYSTEM_DRIVER=public
+10. Now you will see the image in storage/app/public/avatars
+11. Now we want the image to be sync linked to public directory
+12. Just use command `php artisan storage:link`
+13. /tweety/public/storage/avatars
+14. We need to set avatar as fillable field or laravel ignores it.
+15. protected $fillable = ['username', 'name', 'email', 'password', 'avatar'];
+16. Now try to save again to see if it works
+17. Now lets display image
+18. profiles/show.blade.php
+19. <img src="{{ $user->avatar }}"  so is using User.php model method
+20. public function getAvatarAttribute()
+21. return "https://i.pravatar.cc/200?u=" . $this->email;
+22. So we modify it here since we don't need it and change it to path of the asset
+```php
+    public function getAvatarAttribute($value)
+    {
+//        return "https://i.pravatar.cc/200?u=" . $this->email;
+        return asset($value);
+    }
+```
+23. asset() creates a full url access in the application
+24. Set up the image preview in profiles/edit.blade.php
+25. Setup up the image next to the avatar upload input
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
