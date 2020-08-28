@@ -40,7 +40,12 @@ class User extends Authenticatable
     public function getAvatarAttribute($value)
     {
 //        return "https://i.pravatar.cc/200?u=" . $this->email;
-        return asset($value);
+        return asset($value ?: '/images/default-avatar.jpeg');
+    }
+
+    public function setPasswordAttribute($value)
+    {
+        $this->attributes['password'] = bcrypt($value);
     }
 
     public function timeline()

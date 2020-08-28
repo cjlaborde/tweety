@@ -418,11 +418,84 @@
 24. Set up the image preview in profiles/edit.blade.php
 25. Setup up the image next to the avatar upload input
 
+### Build the Explore Users Page
+#### Creating mutator
+1. Password is visible in database so you need to encrypt it.
+2. Go to User.php model and add a custom mutator
+3. Basically if I were to $user->password = 'foobar' would be first type through this method
+```php
+    public function setPasswordAttribute($value)
+    {
+        $this->attributes['password'] = bcrypt($value);
+    }
+```
+#### Make Avatar optional
+1.  Remove required
+2. Create if statement that if only when we have avatar do we store it.
 
+#### Use toggle method in Followable.php trait
+1. Go to toggleFollow() method and make it a toggle method
+2. Does the same thing but clean up the code
+```php
+    public function toggleFollow(User $user)
+    {
+//        if ($this->following($user)) {
+//            return $this->unfollow($user);
+//        }
+//
+//        return $this->follow($user);
+        $this->follows()->toggle($user);
+    }
+```
+#### The Explore Page
+1. Create explore page route `Route::get('/explore', 'ExploreController@index');`
+2. Then create ExploreController
+3. php artisan make:controller ExploreController
+4. Problem now is even guest can access page so move it to middleware auth group in web.php
+5. Now we need to create new users.
+6. tinker then  factory('App\User', 10)->create()
+7. Yet we get error since we forget to update factory to add username
+8. So we add it to factory
+```php
+$factory->define(User::class, function (Faker $faker) {
+    return [
+        'username' => $faker->unique()->username,
+```
+9. Now use tinker again tinker then  factory('App\User', 10)->create() and it works
+10. now work on index to show 50 users
+```php
+    public function index()
+    {
+        return view('explore', [
+            'users' => User::paginate(50),
+        ]);
+    }
+```
+11. Now we add image in explore.blade.php
+12. Yet notice they don't have image so lets set default image.
+13. Go to User.php model and go to getAvatarAttribute() method and add default image for users without display picture
+```php
+    public function getAvatarAttribute($value)
+    {
+//        return "https://i.pravatar.cc/200?u=" . $this->email;
+        return asset($value ?: '/images/default-avatar.jpeg');
+    }
+```
+14. explore.blade.php work on the layout
+15. Add pagination {{ $user->links() }}
+16. Make image rounded and clickable to profile
+16. We need to update follow since using name not working
+17. Go to follow-button.blade and change name to username
+18. But to stop this from happening again create a route action="{{ route('follow', $user->username) }}">
+19. Then go to endput and give it name of follow
+20. Route::post('/profiles/{user:username}/follow', 'FollowsController@store')->name('follow');
 
-
-
-
+#### Seed Tweets
+1. tinker
+2. $users = App\User::all();
+3. Now have everyone excluding me $users = $users->skip(1);
+4. Now generate 10 tweets for each of those users we will hardcode the user id
+5. $users->each(function ($user) { factory('App\Tweet', 10)->create(['user_id' => $user->id]); });
 
 
 
