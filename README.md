@@ -497,12 +497,59 @@ $factory->define(User::class, function (Faker $faker) {
 4. Now generate 10 tweets for each of those users we will hardcode the user id
 5. $users->each(function ($user) { factory('App\Tweet', 10)->create(['user_id' => $user->id]); });
 
+### Clean Up
+#### Miscellaneous Tweaks
+1. Add required to tweet submit input in _publish-tweet-panel.blade.php
+2. improve submit button
 
+#### Invokable Controllers
+1. Invokable controller is a controller that will only have single action
+```php
+//    Route::get('/explore', 'ExploreController@index');
+    Route::get('/explore', 'ExploreController');
+```
+2. It will not work so go to ExploreController
+3. Switch `public function index()`
+4. Into `public function __invoke()`
+5. Add maximum width for when name is too long
+6. go to profiles/show.blade.php  <div style="max-width: 270px">
 
+#### Timeline Pagination
+1. change it to $tweets and move it to controller
+```php
+    @include ('_timeline', [
+        /*'tweets' => $user->tweets*/
+        'tweets' => $tweets 
+    ])
+```
+2. Go to ProfilesController
+```php
+    public function show(User $user)
+    {
+        return view('profiles.show', [
+            'user' => $user,
+            'tweets' => $user->tweets()->paginate(3)
+        ]);
+    }
+```
+3. Then add in _timeline.blade.php `{{ $tweets->links() }}` to render the pagination
+4. To be able to modify pagination style you need to publish it to edit it.
+5. php artisan vendor:publish will show a menu and we want laravel-pagination
+6. resources/views/vendor/pagination/bootstrap-4.blade.php
+7. <ul class="flex justify-between w-64 p-4 mx-auto"> to add the style
+8. Then set the active color <li class="page-item active text-blue-500"
+9. then in ProfilesController set it to a high number `'tweets' => $user->tweets()->paginate(50)`
+10. add pagination to User.php Timeline
+```php
+public function timeline()
+{
+        $friends = $this->follows->pluck('id');
 
-
-
-
+        return Tweet::whereIn('user_id', $friends)
+            ->orWhere('user_id', $this->id)
+            ->latest()->paginate(50);
+}
+```
 
 
 
