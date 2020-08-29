@@ -1,8 +1,8 @@
 <div class="flex p-4 {{$loop->last ? '' : 'border-b border-gray-400' }}">
     <div class="mr-2 flex-shrink-0">
         <a href="{{ $tweet->user->path() }}">
-            <img 
-                src="{{ $tweet->user->avatar }}" 
+            <img
+                src="{{ $tweet->user->avatar }}"
                 alt=""
                 class="rounded-full mr-2"
                 width="50"
@@ -15,12 +15,16 @@
         <h5 class="fort-bold mb-4">
             <a href="{{ $tweet->user->path() }}">
                 {{ $tweet->user->name }}
-            </a>    
-            
+            </a>
+
         </h5>
 
             <p class="text-sm">
                 {{ $tweet->body }}
             </p>
+
+        @auth
+            <x-like-buttons :tweet="$tweet" />
+        @endauth
     </div>
 </div>

@@ -551,6 +551,147 @@ public function timeline()
 }
 ```
 
+### Build a Like/Dislike System
+1. php artisan make:migration create_likes_table
+2. fill the migration file
+3. Traditional way to do a foreign key
+4. ~~$table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');~~
+5. Now in laravel 7 you can do instead
+6. `$table->foreignId('user_id')->constrained()->onDelete('cascade');`
+7. `$table->foreignId('tweet_id')->constrained()->onDelete('cascade');`
+8. php artisan migrate
+
+#### MySQL Play
+1. fill likes table
+2. Now what we want is way to count likes and dislikes
+3. Select table
+4. in SQL editor type
+5. To get the likes `select tweet_id, sum(liked) likes from likes group by tweet_id`
+6. To get the dislikes `select tweet_id, sum(!liked) dislikes from likes group by tweet_id`
+7. What we want is get all of our tweets then stack the likes and dislike information
+8. `select * from tweets left join likes on likes.tweet_id = tweets.id`
+9. We always want tweet and don't want to exclude them from the results
+```sql
+select * from tweets
+    left join (
+    	select tweet_id, sum(liked) likes, sum(!liked) dislikes from likes group by tweet_id
+    ) likes on likes.tweet_id  = tweet_id 
+```
+10. Go to User.php model and add method likes()
+```php
+    public function likes()
+    {
+        return $this->hasMany(Like::class);
+    }
+```
+11. Click on Like and choose create Class
+12. Add unique constrain so that you can only have 1 record of either dislike or like a single tweet
+13. `$table->unique(['user_id', 'tweet_id']);`
+14. Create like and dislike methods in Tweet model
+15. In Like.php add     protected $guarded = [];
+16. tinker
+17.  $user = App\User::first();
+18.  $tweet = App\Tweet::first();
+19.  $tweet->like($user);
+20. $tweet->dislike($user);
+
+#### Eloquent Behavior
+1. In Tweet.php
+```php
+    public function isLikedBy(User $user)
+    {
+        $this->likes()->where('user_id', $user->id)->exists();
+    }
+```
+2. Problem with this is that if we use it in a loop it will call it and request from database multiple times
+3. Is better to create location instead or redis.
+4. Create isLikedBy and isDislikedBy methods
+```php
+    public function isLikedBy(User $user)
+    {
+        return (bool) $user->likes()->where('user_id', $user->id)->where('liked', true)->count();
+    }
+
+    public function isDislikedBy(User $user)
+    {
+        return (bool) $user->likes()->where('user_id', $user->id)->where('liked', false)->count();
+    }
+```
+5. $user = App\User::first();
+6. $tweet = App\Tweet::first();
+7. $tweet->dislike($user);
+8. $tweet->isDisLikedBy($user);
+9. $tweet->isLikedBy($user->fresh()); Fresh create a new intance.
+#### Write the Markup
+1. Create like button in _tweet.blade.php
+#### Add the Query Scope
+1. return auth()->user()->timeline(); to see all the tweets
+2. Create helper in Likable.php called scopeWithLikes()
+3. Helps with dynamically build your queries
+4. Tweet::all(); gets you all the tweets
+5. Tweet::withLikes()->get(); get all tweets including number of likes
+```php
+    public function scopeWithLikes(Builder $query)
+    {
+        $query->leftJoinSub(
+            'select tweet_id, sum(liked) likes, sum(!liked) dislikes from likes group by tweet_id',
+            'likes',
+            'likes.tweet_id',
+            'tweets.id'
+        );
+    }
+```
+6. tinker
+7. Tweet::first();
+```php
+=> App\Tweet {#3863
+     id: 1,
+     user_id: 1,
+     body: "testing",
+     created_at: "2020-08-27 20:11:47",
+     updated_at: "2020-08-27 20:11:47",
+   }
+```
+8. Tweet::withLikes()->first();
+```php
+    => App\Tweet {#4076
+         id: 1,
+         user_id: 1,
+         body: "testing",
+         created_at: "2020-08-27 20:11:47",
+         updated_at: "2020-08-27 20:11:47",
+         tweet_id: 1,
+         likes: "0",
+         dislikes: "1",
+       }
+```
+9. Now you can see number of likes and dislikes
+10. Or get can load all the tweets and load that up
+11. Tweet::withLikes()->get();
+12. If it null it means no one has liked it or disliked it
+13. User.php and now add withLikes() to the timeline method
+```php
+    public function timeline()
+    {
+        $friends = $this->follows->pluck('id');
+
+        return Tweet::whereIn('user_id', $friends)
+            ->orWhere('user_id', $this->id)
+            ->withLikes()
+            ->latest()->paginate(50);
+    }
+```
+14.    {{ $tweet->dislikes ?: 0 }} if there is null dislike or likes return 0
+#### Build the Forms
+1. build like-buttons.blade.php
+2. Create end point route
+3. php artisan make:controller TweetLikesController
+
+#### Add turboLink
+1. <script src="http://unpkg.com/turbolinks"></script> to master.blade.php
+#### fix bug in profiles.show.blade.php
+1. Go to ProfilesController.php then add withLikes()
+2. 'tweets' => $user->tweets()->withLikes()->paginate(50)
 
 
 
